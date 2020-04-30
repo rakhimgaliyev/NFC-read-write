@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">NFC Handler</string>
+    <string name="write_device_id">Write Device ID</string>
+    <string name="generate_uuid">generate uuid</string>
+    <string name="write_mode">Write Mode</string>
+    <string name="get_device_id">Get Device ID</string>
+</resources>
