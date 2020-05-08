@@ -15,24 +15,23 @@ import android.os.Parcelable;
 import android.util.Log;
 import android.nfc.tech.Ndef;
 import android.view.View;
-import android.view.Window;
-import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.android.material.textfield.TextInputEditText;
 
-import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONException;
 
-import java.io.IOException;
 import java.util.UUID;
+import java.io.IOException;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class MainActivity extends AppCompatActivity {
     private NfcAdapter nfcAdapter;
-    private final String DEVICE_ID = "device_id";
+    private final String DEVICE_ID = "DEVICE_ID";
+    private final String DEVICE_BLUETOOTH_NAME = "DEVICE_BLUETOOTH_NAME";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void setEventListeners() {
         setOnGenerateUUIDListener();
+        setOnGenerateBlNameListener();
     }
 
     private void setOnGenerateUUIDListener() {
@@ -55,6 +55,18 @@ public class MainActivity extends AppCompatActivity {
                 UUID uuid = UUID.randomUUID();
                 TextInputEditText deviceId = findViewById(R.id.write_device_id);
                 deviceId.setText(uuid.toString());
+            }
+        });
+    }
+
+    private void setOnGenerateBlNameListener() {
+        MaterialButton generateUUID = findViewById(R.id.generate_bl_name);
+        generateUUID.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String blName = "ESP32" + ThreadLocalRandom.current().nextInt(1000, 10000);
+                TextInputEditText deviceBlName = findViewById(R.id.write_device_bl_name);
+                deviceBlName.setText(blName);
             }
         });
     }
@@ -85,6 +97,35 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void writeNdefMessageMessage(Ndef ndef) {
+        try {
+            Log.d("tag tech:", "not null");
+            if (ndef.isWritable()) {
+                ndef.connect();
+                JSONObject payloads = new JSONObject();
+
+                TextInputEditText deviceIdInput = findViewById(R.id.write_device_id);
+                String deviceId = "";
+                if (deviceIdInput.getText() != null) {
+                    deviceId = deviceIdInput.getText().toString();
+                }
+                TextInputEditText deviceBlNameInput = findViewById(R.id.write_device_bl_name);
+                String deviceBlName = "";
+                if (deviceBlNameInput.getText() != null) {
+                    deviceBlName = deviceBlNameInput.getText().toString();
+                }
+                payloads.put(DEVICE_ID, deviceId);
+                payloads.put(DEVICE_BLUETOOTH_NAME, deviceBlName);
+                ndef.writeNdefMessage(createNdefMessage(payloads.toString()));
+                Log.d("tag tech:", "writable");
+            } else {
+                Log.d("tag tech:", "not writable");
+            }
+        } catch (IOException | FormatException | JSONException e) {
+            Log.d("tag tech:", "wrong tag format");
+        }
+    }
+
     private void readNdefMessage(Intent intent) {
         Parcelable[] parcelables = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
         if (parcelables != null && parcelables.length > 0) {
@@ -100,46 +141,24 @@ public class MainActivity extends AppCompatActivity {
                     message = message.substring(4);
                 }
                 String deviceId = "";
+                String deviceBlName = "";
                 try {
                     JSONObject jsonObject = new JSONObject(message);
                     deviceId = jsonObject.getString(DEVICE_ID);
+                    deviceBlName = jsonObject.getString(DEVICE_BLUETOOTH_NAME);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
                 TextInputEditText deviceIdView = findViewById(R.id.read_device_id);
                 deviceIdView.setText(deviceId);
+                TextInputEditText deviceBlNameView = findViewById(R.id.read_device_bl_name);
+                deviceBlNameView.setText(deviceBlName);
             } else {
                 Toast.makeText(this, "No NDEF records found", Toast.LENGTH_SHORT).show();
             }
         } else {
             Toast.makeText(this, "No EXTRA_NDEF_MESSAGES found", Toast.LENGTH_SHORT).show();
         }
-    }
-
-    private void writeNdefMessageMessage(Ndef ndef) {
-        try {
-            Log.d("tag tech:", "not null");
-            if (ndef.isWritable()) {
-                ndef.connect();
-                JSONObject payloads = new JSONObject();
-                TextInputEditText deviceIdInput = findViewById(R.id.write_device_id);
-                String deviceId = "";
-                if (deviceIdInput.getText() != null) {
-                    deviceId = deviceIdInput.getText().toString();
-                }
-                payloads.put(DEVICE_ID, deviceId);
-                ndef.writeNdefMessage(createNdefMessage(payloads.toString()));
-                Log.d("tag tech:", "writable");
-            } else {
-                Log.d("tag tech:", "not writable");
-            }
-        } catch (IOException | FormatException | JSONException e) {
-            Log.d("tag tech:", "wrong tag format");
-        }
-    }
-
-    private void readNdefMessage(Ndef ndef) {
-
     }
 
     private String getTextFromNdefRecord(NdefRecord ndefRecord) {

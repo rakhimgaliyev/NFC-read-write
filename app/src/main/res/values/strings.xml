@@ -4,4 +4,7 @@
     <string name="generate_uuid">generate uuid</string>
     <string name="write_mode">Write Mode</string>
     <string name="get_device_id">Get Device ID</string>
+    <string name="write_bluetooth_name">Write bluetooth name</string>
+    <string name="get_bluetooth_name">Get bluetooth name</string>
+    <string name="generate_bluetooth_name">Generate bluetooth name</string>
 </resources>
