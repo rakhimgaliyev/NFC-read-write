@@ -7,4 +7,7 @@
     <string name="write_bluetooth_name">Write bluetooth name</string>
     <string name="get_bluetooth_name">Get bluetooth name</string>
     <string name="generate_bluetooth_name">Generate bluetooth name</string>
+    <string name="write_bluetooth_mac_address">Write bluetooth MAC address</string>
+    <string name="read_mode">Read mode</string>
+    <string name="get_bluetooth_mac_address">Get bluetooth MAC address</string>
 </resources>

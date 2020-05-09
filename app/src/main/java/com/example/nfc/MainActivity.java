@@ -32,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
     private NfcAdapter nfcAdapter;
     private final String DEVICE_ID = "DEVICE_ID";
     private final String DEVICE_BLUETOOTH_NAME = "DEVICE_BLUETOOTH_NAME";
+    private final String DEVICE_BLUETOOTH_MAC_ADDRESS = "DEVICE_BLUETOOTH_MAC_ADDRESS";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,13 +110,21 @@ public class MainActivity extends AppCompatActivity {
                 if (deviceIdInput.getText() != null) {
                     deviceId = deviceIdInput.getText().toString();
                 }
+
                 TextInputEditText deviceBlNameInput = findViewById(R.id.write_device_bl_name);
                 String deviceBlName = "";
                 if (deviceBlNameInput.getText() != null) {
                     deviceBlName = deviceBlNameInput.getText().toString();
                 }
+
+                TextInputEditText deviceBlMACAddressInput = findViewById(R.id.write_device_bl_mac_address);
+                String deviceBlMACAddress = "";
+                if (deviceBlMACAddressInput.getText() != null) {
+                    deviceBlMACAddress = deviceBlMACAddressInput.getText().toString();
+                }
                 payloads.put(DEVICE_ID, deviceId);
                 payloads.put(DEVICE_BLUETOOTH_NAME, deviceBlName);
+                payloads.put(DEVICE_BLUETOOTH_MAC_ADDRESS, deviceBlMACAddress);
                 ndef.writeNdefMessage(createNdefMessage(payloads.toString()));
                 Log.d("tag tech:", "writable");
             } else {
@@ -142,10 +151,12 @@ public class MainActivity extends AppCompatActivity {
                 }
                 String deviceId = "";
                 String deviceBlName = "";
+                String deviceBlMACAddress = "";
                 try {
                     JSONObject jsonObject = new JSONObject(message);
                     deviceId = jsonObject.getString(DEVICE_ID);
                     deviceBlName = jsonObject.getString(DEVICE_BLUETOOTH_NAME);
+                    deviceBlMACAddress = jsonObject.getString(DEVICE_BLUETOOTH_MAC_ADDRESS);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -153,6 +164,8 @@ public class MainActivity extends AppCompatActivity {
                 deviceIdView.setText(deviceId);
                 TextInputEditText deviceBlNameView = findViewById(R.id.read_device_bl_name);
                 deviceBlNameView.setText(deviceBlName);
+                TextInputEditText deviceBlMACAddressView = findViewById(R.id.read_device_bl_mac_address);
+                deviceBlMACAddressView.setText(deviceBlMACAddress);
             } else {
                 Toast.makeText(this, "No NDEF records found", Toast.LENGTH_SHORT).show();
             }
